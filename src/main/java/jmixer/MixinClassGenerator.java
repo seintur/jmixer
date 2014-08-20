@@ -23,8 +23,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.Generated;
-
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtFieldAccess;
 import spoon.reflect.code.CtInvocation;
@@ -100,51 +98,11 @@ public class MixinClassGenerator {
        */
       processMethods(target,srcClasses);
       processFields(target);
-      addGetFcGeneratorParametersMethod(target, srcClasses);
 
       SpoonHelper.safeTypeRemoval(fooClass);
       return target;
   }
 
-  /**
-   * Add the implementation of the {@link Generated} interface to the specified
-   * class.
-   */
-  private void addGetFcGeneratorParametersMethod(
-      CtClass<?> target, CtClass<?>[] srcClasses ) {
-      
-      /*
-       * Add the getFcGeneratorParametersMethod method.
-       */
-      CtTypeReference<String> trstr = factory.Type().createReference(String.class);
-      Set<ModifierKind> mods = new HashSet<ModifierKind>();
-      mods.add(ModifierKind.PUBLIC);
-      CtMethod<?> meth =
-          factory.Method().create(
-              target, mods, trstr, "getFcGeneratorParameters", null, null);
-      
-      // Create the string returned by the method
-      String str = "("+getClass().getName()+" "+target.getQualifiedName();
-      for (CtClass<?> srcClass : srcClasses) {
-          str += " "+srcClass.getQualifiedName();
-      }
-      str += ")";
-      
-      // Create the body
-      CtBlock<?> body = factory.Core().createBlock();
-      CtReturn<?> retstat = factory.Core().createReturn();
-      CtLiteral<String> lit = factory.Code().createLiteral(str);
-      retstat.setReturnedExpression((CtLiteral)lit);
-      body.insertBegin(retstat);
-      meth.setBody((CtBlock)body);
-      
-      /*
-       * Add Generated to the list of implemented interfaces.
-       */
-      CtTypeReference<Generated> tr = factory.Type().createReference(Generated.class);
-      target.getSuperInterfaces().add(tr);
-  }
-  
   /**
    * Remove the _this_ prefix in all field accesses defined in the given class.
    */
