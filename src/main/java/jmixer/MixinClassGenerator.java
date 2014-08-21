@@ -76,31 +76,20 @@ public class MixinClassGenerator {
     }
   
     /**
-     * Generate a class by applying the mixin algorithm on the specified
-     * classes.
+     * Mix the specified classes in the target class.
      * 
-     * @param targetClassName  the name of the target class
-     * @param srcClasses       the classes to mix
-     * @return                 the generated class
+     * @param targetClass  the target class
+     * @param srcClasses   the classes to mix
      */
-    public CtClass<?> generate( String targetClassName, CtClass<?>[] srcClasses ) {
+    public void generate( CtClass<?> target, CtClass<?>[] srcClasses ) {      
       
+      // Create a class for temporarily storing generated methods
       CtSimpleType<?> fooClass = factory.Class().create(TMP_CLASS_NAME);
-      
-      /*
-       * Create the target class.
-       */
-      CtClass<?> target = factory.Class().create(targetClassName);
-      target.setVisibility(ModifierKind.PUBLIC);
-      
-      /*
-       * Mix the layers and store the mixed code in the target class.
-       */
+        
       processMethods(target,srcClasses);
       processFields(target);
-
+      
       SpoonHelper.safeTypeRemoval(fooClass);
-      return target;
   }
 
   /**
@@ -210,7 +199,9 @@ public class MixinClassGenerator {
            * Add implemented interfaces.
            */
           Set<CtTypeReference<?>> supers = src.getSuperInterfaces();
-          target.getSuperInterfaces().addAll(supers);
+          for (CtTypeReference<?> s : supers) {
+			target.addSuperInterface(s);
+		}
       }
       
       /*

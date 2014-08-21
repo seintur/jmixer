@@ -38,19 +38,15 @@ extends AbstractAnnotationProcessor<Mixin,CtClass<?>> {
 		Factory f = ctclass.getFactory();
 		ClassFactory cf = f.Class();
 
-		String[] s = annotation.s();
-		System.out.println(s);
-		
 		Class<?>[] mixes = annotation.value();
-		CtClass<?>[] ctmixes = new CtClass<?>[mixes.length + 1];
-		ctmixes[0] = ctclass;
-		for (int i = 1; i < mixes.length; i++) {
-			Class<?> mix = mixes[i-1];
+		CtClass<?>[] ctmixes = new CtClass<?>[mixes.length];
+		for (int i = 0; i < ctmixes.length; i++) {
+			Class<?> mix = mixes[i];
 			ctmixes[i] = cf.get(mix);
 		}
 		
 		MixinClassGenerator mcg = new MixinClassGenerator(f);
-		CtClass<?> c = mcg.generate("A",ctmixes);
-		System.out.println(c);
+		mcg.generate(ctclass,ctmixes);
+		System.out.println(ctclass);
 	}
 }
