@@ -47,6 +47,5 @@ extends AbstractAnnotationProcessor<Mixin,CtClass<?>> {
 		
 		MixinClassGenerator mcg = new MixinClassGenerator(f);
 		mcg.generate(ctclass,ctmixes);
-		System.out.println(ctclass);
 	}
 }

@@ -7,5 +7,6 @@ public abstract class Swimming {
 		System.out.println("Swimming");
 		_super_print();
 	}
-	public abstract void _super_print();
+	
+	protected abstract void _super_print();
 }

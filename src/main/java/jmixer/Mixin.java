@@ -26,10 +26,5 @@ package jmixer;
  * @author Lionel Seinturier <Lionel.Seinturier@univ-lille1.fr>
  */
 public @interface Mixin {
-
 	Class<?>[] value();
-	int i();
-	String[] s();
-	Class<?> c();
-	Class<?>[] cc();
 }

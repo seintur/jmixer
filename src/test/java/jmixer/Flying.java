@@ -7,5 +7,6 @@ public abstract class Flying {
 		System.out.println("Flying");
 		_super_print();
 	}
-	public abstract void _super_print();
+
+	protected abstract void _super_print();
 }
