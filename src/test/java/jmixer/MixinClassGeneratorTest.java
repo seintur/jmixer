@@ -1,7 +1,5 @@
 package jmixer;
 
-import java.lang.reflect.Method;
-
 import org.junit.Test;
 
 public class MixinClassGeneratorTest {
@@ -11,17 +9,12 @@ public class MixinClassGeneratorTest {
 		String[] args =
 			new String[] {
 				"-i", "src/test/java",
-				"-o", "target/classes",
+				"-d", "target/classes",
 				"--processors", MixinProcessor.class.getName(),
 				"--compile" };
 		spoon.Launcher.main(args);
 		
-		Class<?> cl = Class.forName("jmixer.Duck");
-		Object duck = cl.newInstance();
-		
-		Method[] ms = cl.getMethods();
-		
-		Method m = cl.getMethod("print");
-		m.invoke(duck);
+		Duck.class.getMethod("fly");
+		Duck.class.getMethod("swim");
 	}
 }
