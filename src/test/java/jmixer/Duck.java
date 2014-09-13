@@ -1,5 +1,5 @@
 package jmixer;
 
 @Mixin(value={Flying.class, Swimming.class})
-public class Duck {
+public class Duck extends Bird {
 }
