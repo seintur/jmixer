@@ -147,7 +147,7 @@ public class MixinClassGenerator {
            */
           CtClass<?> src = srcClasses[i];
           Set<CtMethod<?>> methods = src.getMethods();
-          meths[i] = new HashSet<CtMethod<?>>();
+          meths[i] = new HashSet<>();
           
           for (CtMethod<?> method : methods) {
               
@@ -176,7 +176,7 @@ public class MixinClassGenerator {
                * Update the type references.
                * Update the calls to _super_... methods.
                */
-              meths[i].add( newMeth );
+              meths[i].add(newMeth);
               setSource(method,newMeth);
               updateTypeRefs(newMeth,src,target);
               updateCallsTo_this_Method(newMeth);
@@ -254,7 +254,7 @@ public class MixinClassGenerator {
   /**
    * Insert a method in a target class.
    * <code>previous</code> may be null or may reference a method with a same
-   * signature which has already been inserted. In such a case, rename the new
+   * signature that has already been inserted. In such a case, rename the new
    * method following the name$99 scheme.
    * 
    * @param method    the current method
@@ -458,7 +458,7 @@ public class MixinClassGenerator {
       
       List<CtInvocation<?>> invs =
           Query.getElements(
-                  newMeth,
+              newMeth,
               new AbstractFilter<CtInvocation<?>>(CtInvocation.class) {
                   public boolean matches(CtInvocation<?> inv) {
                       CtExecutableReference<?> cer = inv.getExecutable();
@@ -486,7 +486,7 @@ public class MixinClassGenerator {
       
       List<CtInvocation<?>> invs =
           Query.getElements(
-                  newMeth,
+              newMeth,
               new AbstractFilter<CtInvocation<?>>(CtInvocation.class) {
                   public boolean matches(CtInvocation<?> inv) {
                       CtExecutableReference<?> cer = inv.getExecutable();

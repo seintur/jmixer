@@ -32,7 +32,6 @@ import spoon.reflect.factory.Factory;
 public class MixinProcessor
 extends AbstractAnnotationProcessor<Mixin,CtClass<?>> {
 
-	@Override
 	public void process( Mixin annotation, CtClass<?> ctclass ) {
 		
 		Factory f = ctclass.getFactory();
