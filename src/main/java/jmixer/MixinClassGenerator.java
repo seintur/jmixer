@@ -32,7 +32,6 @@ import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtParameter;
-import spoon.reflect.declaration.CtSimpleType;
 import spoon.reflect.declaration.ModifierKind;
 import spoon.reflect.factory.Factory;
 import spoon.reflect.reference.CtExecutableReference;
@@ -59,12 +58,6 @@ public class MixinClassGenerator {
     /** The separator for mixed method names. */
     final public static char MIXED_METH_SEP = '$';
   
-    /**
-     * The name of the class used by this class for temporary storing data about
-     * methods being processed.
-     */
-    final private static String TMP_CLASS_NAME = "Foo";
-
   
     private Factory factory;
   
@@ -82,14 +75,8 @@ public class MixinClassGenerator {
      * @param srcClasses   the classes to mix
      */
     public void generate( CtClass<?> target, CtClass<?>[] srcClasses ) {      
-      
-      // Create a class for temporarily storing generated methods
-      CtSimpleType<?> fooClass = factory.Class().create(TMP_CLASS_NAME);
-        
       processMethods(target,srcClasses);
       processFields(target);
-      
-      SpoonHelper.safeTypeRemoval(fooClass);
   }
 
   /**
@@ -226,8 +213,7 @@ public class MixinClassGenerator {
                * - remove the abstract modifier
                * - add an empty body
                */
-              CtClass<?> foo = factory.Class().get(TMP_CLASS_NAME);
-              CtMethod<?> tmp = factory.Method().create(foo,method,true);
+              CtMethod<?> tmp = factory.Core().clone(method);
               String name = tmp.getSimpleName().substring(SUPER.length());
               tmp.setSimpleName(name);
               tmp.getModifiers().remove(ModifierKind.ABSTRACT);
@@ -280,12 +266,8 @@ public class MixinClassGenerator {
           /*
            * A method with the same name has already been inserted.
            * Compute the name of the new method (something like name$99).
-           * To avoid name clashes, create the method in the foo class
-           * rename it, and after that, insert it into the target class.
            */
-          CtClass<?> foo = factory.Class().get(TMP_CLASS_NAME);
-          newMeth = factory.Method().create(foo,method,true);
-          
+          newMeth = factory.Core().clone(method);          
           String name = getSuperMethodName(previous.getSimpleName());
           newMeth.setSimpleName(name);
           newMeth.setVisibility(ModifierKind.PRIVATE);
@@ -318,7 +300,7 @@ public class MixinClassGenerator {
    * @param current  the current position in meths
    * @param method   the current method
    * @return  the last mixed method with a name similar to the current one
-   *          or null if no similar method exists
+   *          or <code>null</code> if no similar method exists
    */
   private CtMethod<?> getPreviouslyDefinedMethod(
           Set<CtMethod<?>>[] meths, int current, CtMethod<?> method ) {
