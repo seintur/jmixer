@@ -227,16 +227,6 @@ public class SpoonHelper {
             } else {
                 comment.append(',');
             }
-            /*
-             * Use toString() instead of getQualifiedName().
-             * For array types, getQualifiedName() returns the type of the
-             * elements stored in the array, not the type of the array ([] is
-             * then missing). toString() uses SignaturePrinter that deals
-             * correctly with arrays.
-             * 
-             * Check the Spoon mailing list: the bug may have been corrected
-             * since I reported it. 
-             */
             comment.append(p.getType().toString());
         }
         comment.append(')');
