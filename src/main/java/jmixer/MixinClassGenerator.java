@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import spoon.reflect.Factory;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtFieldAccess;
 import spoon.reflect.code.CtInvocation;
@@ -33,7 +34,6 @@ import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.ModifierKind;
-import spoon.reflect.factory.Factory;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtFieldReference;
 import spoon.reflect.reference.CtPackageReference;
@@ -134,7 +134,7 @@ public class MixinClassGenerator {
            */
           CtClass<?> src = srcClasses[i];
           Set<CtMethod<?>> methods = src.getMethods();
-          meths[i] = new HashSet<>();
+          meths[i] = new HashSet<CtMethod<?>>();
           
           for (CtMethod<?> method : methods) {
               
@@ -187,7 +187,7 @@ public class MixinClassGenerator {
            */
           Set<CtTypeReference<?>> supers = src.getSuperInterfaces();
           for (CtTypeReference<?> s : supers) {
-			target.addSuperInterface(s);
+			target.getSuperInterfaces().add(s);
 		}
       }
       
@@ -268,7 +268,7 @@ public class MixinClassGenerator {
            * Compute the name of the new method (something like name$99).
            */
           newMeth = factory.Core().clone(method);          
-          String name = getSuperMethodName(previous.getSimpleName());
+          String name = getSuperMethodName(previous);
           newMeth.setSimpleName(name);
           newMeth.setVisibility(ModifierKind.PRIVATE);
           
@@ -282,7 +282,8 @@ public class MixinClassGenerator {
    * Given a method name (foo or something like foo$98), return the name of
    * the super method (foo$0 or foo$99).
    */
-  private String getSuperMethodName( String name ) {        
+  private String getSuperMethodName( CtMethod<?> method ) {
+	  String name = method.getSimpleName();
       int pos = name.lastIndexOf(MIXED_METH_SEP);
       if( pos == -1 ) {
           return name + MIXED_METH_SEP + "0";
@@ -521,7 +522,7 @@ public class MixinClassGenerator {
               }
               
               found = true;
-              String superMethName = getSuperMethodName(meth.getSimpleName());
+              String superMethName = getSuperMethodName(meth);
               cer.setSimpleName(superMethName);
               break;
           }
