@@ -2,7 +2,9 @@ apply plugin: 'java'
 
 repositories {
 	mavenCentral()
-	mavenLocal()
+	maven {
+		url "http://maven-repo.gforge.inria.fr/releases"
+	}
 }
 
 dependencies {
