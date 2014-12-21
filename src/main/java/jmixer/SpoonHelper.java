@@ -19,10 +19,15 @@
 
 package jmixer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import spoon.reflect.code.CtLiteral;
+import spoon.reflect.declaration.CtExecutable;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.factory.CodeFactory;
+import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtTypeReference;
 
 /**
@@ -81,5 +86,23 @@ public class SpoonHelper {
         }
         comment.append(')');
         return comment.toString();
+    }
+    
+    /**
+     * Return the type references of the parameters associated with the
+     * specified executable reference.
+     * 
+     * @param cer  the executable reference
+     * @return     the parameter types
+     */
+    public static List<CtTypeReference<?>> getParameterTypes( CtExecutableReference<?> cer ) {
+    	CtExecutable<?> exec = cer.getDeclaration();
+    	List<CtParameter<?>> params = exec.getParameters();
+    	List<CtTypeReference<?>> trefs = new ArrayList<CtTypeReference<?>>();
+    	for (CtParameter<?> param : params) {
+    		CtTypeReference<?> tref = param.getType();
+    		trefs.add(tref);
+		}
+    	return trefs;
     }
 }

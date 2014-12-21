@@ -23,7 +23,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import spoon.reflect.Factory;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtFieldAccess;
 import spoon.reflect.code.CtInvocation;
@@ -34,6 +33,7 @@ import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.ModifierKind;
+import spoon.reflect.factory.Factory;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtFieldReference;
 import spoon.reflect.reference.CtPackageReference;
@@ -486,7 +486,7 @@ public class MixinClassGenerator {
       for (CtInvocation<?> inv : invs) {
           
           CtExecutableReference<?> cer = inv.getExecutable();
-          List<CtTypeReference<?>> ctrs = cer.getParameterTypes();
+          List<CtTypeReference<?>> ctrs = SpoonHelper.getParameterTypes(cer);
           final String invMethName = cer.getSimpleName().substring(SUPER.length());
           final String s = invMethName + MIXED_METH_SEP;
           

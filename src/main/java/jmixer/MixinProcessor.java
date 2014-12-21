@@ -20,9 +20,9 @@
 package jmixer;
 
 import spoon.processing.AbstractAnnotationProcessor;
-import spoon.reflect.Factory;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.factory.ClassFactory;
+import spoon.reflect.factory.Factory;
 
 /**
  * An annotation processor for the @{@link Mixin} annotation.
