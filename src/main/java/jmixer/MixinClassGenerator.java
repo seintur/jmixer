@@ -74,7 +74,7 @@ public class MixinClassGenerator {
      * @param targetClass  the target class
      * @param srcClasses   the classes to mix
      */
-    public void generate( CtClass<?> target, CtClass<?>[] srcClasses ) {      
+    public void generate( CtClass<?> target, CtClass<?>... srcClasses ) {      
       processMethods(target,srcClasses);
       processFields(target);
     }

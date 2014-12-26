@@ -1,31 +1,40 @@
 package jmixer;
 
-import java.net.URL;
-import java.net.URLClassLoader;
+import java.io.File;
 
+import org.junit.Assert;
 import org.junit.Test;
+
+import spoon.Launcher;
+import spoon.compiler.SpoonCompiler;
+import spoon.reflect.declaration.CtClass;
+import spoon.reflect.declaration.CtMethod;
+import spoon.reflect.factory.Factory;
 
 public class MixinClassGeneratorTest {
 
 	@Test
 	public void testMixer() throws Exception {
 		
-		String classpath = System.getProperty("java.class.path");
-		String[] args =
-			new String[] {
-				"-i", "src/test/java",
-				"--source-classpath", classpath,
-				"-o", "target/spooned",
-				"-d", "target/spooned-classes",
-				"--processors", MixinProcessor.class.getName(),
-				"--compile" };
-		spoon.Launcher.main(args);
+		SpoonCompiler comp = new Launcher().createCompiler();
+		comp.addInputSource(new File("./src/test/java/jmixer/Bird.java"));
+		comp.addInputSource(new File("./src/test/java/jmixer/Duck.java"));
+		comp.addInputSource(new File("./src/test/java/jmixer/Flying.java"));
+		comp.addInputSource(new File("./src/test/java/jmixer/Swimming.java"));
+		comp.build();
 		
-		URLClassLoader urlcl =
-			new URLClassLoader(new URL[]{new URL("file:target/spooned-classes/")},null);
+		Factory factory = comp.getFactory();
+		CtClass<?> duck = factory.Class().get("jmixer.Duck");
+		CtClass<?> flying = factory.Class().get("jmixer.Flying");
+		CtClass<?> swimming = factory.Class().get("jmixer.Swimming");
 		
-		urlcl.loadClass("jmixer.Duck").getMethod("fly");
-		urlcl.loadClass("jmixer.Duck").getMethod("swim");
-		urlcl.close();
+		MixinClassGenerator mcg = new MixinClassGenerator(factory);
+		mcg.generate(duck,flying,swimming);
+		
+		CtMethod<?> fly = duck.getMethod("fly");
+		Assert.assertEquals("void",fly.getType().toString());
+
+		CtMethod<?> swim = duck.getMethod("swim");
+		Assert.assertEquals("void",swim.getType().toString());
 	}
 }
