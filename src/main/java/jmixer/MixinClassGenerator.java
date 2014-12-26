@@ -23,7 +23,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import spoon.reflect.Factory;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtFieldAccess;
 import spoon.reflect.code.CtInvocation;
@@ -34,6 +33,7 @@ import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.ModifierKind;
+import spoon.reflect.factory.Factory;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtFieldReference;
 import spoon.reflect.reference.CtPackageReference;
@@ -77,44 +77,43 @@ public class MixinClassGenerator {
     public void generate( CtClass<?> target, CtClass<?>[] srcClasses ) {      
       processMethods(target,srcClasses);
       processFields(target);
-  }
+    }
 
-  /**
-   * Remove the _this_ prefix in all field accesses defined in the given class.
-   */
-  private void processFields( CtClass<?> target ) {
+    /**
+     * Remove the _this_ prefix in all field accesses defined in the given class.
+     */
+    private void processFields( CtClass<?> target ) {
       
-      // Get all the field accesses contained in target
-      List<CtFieldAccess<?>> fas =
-          Query.getElements(
-              target,
-              new AbstractFilter<CtFieldAccess<?>>(CtFieldAccess.class) {
-                  public boolean matches( CtFieldAccess<?> fa) {
-                      return true;
-                  }
-              }
-      );
+        // Get all the field accesses contained in target
+        List<CtFieldAccess<?>> fas =
+            Query.getElements(
+                target,
+                new AbstractFilter<CtFieldAccess<?>>(CtFieldAccess.class) {
+                    public boolean matches( CtFieldAccess<?> fa) {
+                        return true;
+                    }
+                }
+            );
       
-      // Remove the _this_ prefix
-      for (CtFieldAccess<?> fa : fas) {
-          CtFieldReference<?> cfr = fa.getVariable();
-          String fieldName = cfr.getSimpleName();
-          if( fieldName.startsWith(THIS) ) {
-              String newFieldName =
-                  fieldName.substring(THIS.length());
-              cfr.setSimpleName(newFieldName);
-          }
-      }
-  }
+        // Remove the _this_ prefix
+        for (CtFieldAccess<?> fa : fas) {
+            CtFieldReference<?> cfr = fa.getVariable();
+            String fieldName = cfr.getSimpleName();
+            if( fieldName.startsWith(THIS) ) {
+                String newFieldName = fieldName.substring(THIS.length());
+                cfr.setSimpleName(newFieldName);
+            }
+        }
+    }
   
-  /**
-   * Mix the methods defined in the given classes and insert the result in the
-   * given target class.
-   * 
-   * @param target      the target class
-   * @param srcClasses  the classes containing the methods to be mixed
-   */
-  private void processMethods( CtClass<?> target, CtClass<?>[] srcClasses ) {
+    /**
+     * Mix the methods defined in the given classes and insert the result in the
+     * given target class.
+     * 
+     * @param target      the target class
+     * @param srcClasses  the classes containing the methods to be mixed
+     */
+    private void processMethods( CtClass<?> target, CtClass<?>[] srcClasses ) {
       
       /*
        * Add @see tags in target to reference the mixed classes.
@@ -136,15 +135,22 @@ public class MixinClassGenerator {
           Set<CtMethod<?>> methods = src.getMethods();
           meths[i] = new HashSet<CtMethod<?>>();
           
+          Set<CtMethod<?>> abstractMethods = new HashSet<CtMethod<?>>();
+          
           for (CtMethod<?> method : methods) {
               
               /*
-               * Skip abstract methods.
-               * Given the definition of the mixin mechanism, these are
-               * methods such as: _this_...() or _super_...().
+               * Abstract methods are inserted in target for consistency with
+               * regards to call to _super_... methods. They are removed once
+               * the called to _super_... methods are resolved.
                */
               if( method.hasModifier(ModifierKind.ABSTRACT) ) {
-                  continue;
+                  target.addMethod(method);
+                  String mname = method.getSimpleName();
+                  if( mname.startsWith(SUPER) ) {
+                	  abstractMethods.add(method);
+                  }
+            	  continue;
               }
               
               /*
@@ -152,10 +158,6 @@ public class MixinClassGenerator {
                */
               CtMethod<?> previous = getPreviouslyDefinedMethod(meths,i,method);
               CtMethod<?> newMeth = insertMethod(method,target,previous);
-              
-              if( newMeth == null ) {
-                  continue;
-              }
               
               /*
                * Add a @see Javadoc comment to the inserted method to trace it
@@ -168,6 +170,13 @@ public class MixinClassGenerator {
               updateTypeRefs(newMeth,src,target);
               updateCallsTo_this_Method(newMeth);
               updateCallsTo_super_Method(newMeth,meths[i]);
+          }
+          
+          /*
+           * Remove abstract methods.
+           */
+          for (CtMethod<?> abstractMethod : abstractMethods) {
+			target.removeMethod(abstractMethod);
           }
           
           /*
@@ -234,8 +243,8 @@ public class MixinClassGenerator {
               
               insertMethod(tmp,target,previous);
           }
-      }
-  }
+      }      
+    }
   
   /**
    * Insert a method in a target class.
@@ -251,30 +260,24 @@ public class MixinClassGenerator {
   private CtMethod<?> insertMethod(
           CtMethod<?> method, CtClass<?> target, CtMethod<?> previous ) {
       
+      CtMethod<?> newMeth = factory.Core().clone(method);          
+      
       /*
        * Check whether the current method has already been inserted.
-       * If not simply insert it in the target class.
-       * If so, rename it to something like name$99 before inserting it.
        */
-      CtMethod<?> newMeth;                
-
-      if( previous == null ) {
-          newMeth = factory.Method().create(target,method,true);
-      }
-      else {
+      if( previous != null ) {
           
           /*
            * A method with the same name has already been inserted.
            * Compute the name of the new method (something like name$99).
            */
-          newMeth = factory.Core().clone(method);          
           String name = getSuperMethodName(previous);
           newMeth.setSimpleName(name);
           newMeth.setVisibility(ModifierKind.PRIVATE);
-          
-          newMeth = factory.Method().create(target,newMeth,true);                    
       }
       
+      target.addMethod(newMeth);
+
       return newMeth;
   }
   
@@ -486,7 +489,7 @@ public class MixinClassGenerator {
       for (CtInvocation<?> inv : invs) {
           
           CtExecutableReference<?> cer = inv.getExecutable();
-          List<CtTypeReference<?>> ctrs = cer.getParameterTypes();
+          List<CtTypeReference<?>> ctrs = SpoonHelper.getParameterTypes(cer);
           final String invMethName = cer.getSimpleName().substring(SUPER.length());
           final String s = invMethName + MIXED_METH_SEP;
           
