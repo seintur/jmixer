@@ -21,6 +21,7 @@ public class MixinClassGeneratorTest {
 		comp.addInputSource(new File("./src/test/java/jmixer/Duck.java"));
 		comp.addInputSource(new File("./src/test/java/jmixer/Flying.java"));
 		comp.addInputSource(new File("./src/test/java/jmixer/Swimming.java"));
+		comp.addInputSource(new File("./src/main/java/jmixer/Mixin.java"));
 		comp.build();
 		
 		Factory factory = comp.getFactory();
