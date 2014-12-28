@@ -141,13 +141,13 @@ public class MixinClassGenerator {
               
               /*
                * Abstract methods are inserted in target for consistency with
-               * regards to call to _super_... methods. They are removed once
-               * the called to _super_... methods are resolved.
+               * regards to call to _super_... and _this_... methods. They are
+               * removed once the calls are resolved.
                */
               if( method.hasModifier(ModifierKind.ABSTRACT) ) {
                   target.addMethod(method);
                   String mname = method.getSimpleName();
-                  if( mname.startsWith(SUPER) ) {
+                  if( mname.startsWith(SUPER) || mname.startsWith(THIS) ) {
                 	  abstractMethods.add(method);
                   }
             	  continue;
