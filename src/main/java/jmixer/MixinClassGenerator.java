@@ -196,7 +196,7 @@ public class MixinClassGenerator {
            */
           Set<CtTypeReference<?>> supers = src.getSuperInterfaces();
           for (CtTypeReference<?> s : supers) {
-			target.getSuperInterfaces().add(s);
+			target.addSuperInterface(s);
 		}
       }
       
